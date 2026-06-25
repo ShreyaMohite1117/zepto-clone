@@ -14,6 +14,31 @@ https://github.com/ShreyaMohite1117/zepto-clone
 ---
 
 ## 📸 Screenshots
+
+### 🏠 Home Page
+
+<img width="1363" height="718" alt="home" src="https://github.com/user-attachments/assets/7aff83ec-9ad9-415c-bdb3-e1f4cd91f035" />
+
+### 🔐 Login Page
+
+<img width="1365" height="713" alt="login" src="https://github.com/user-attachments/assets/42cfb685-212c-49cf-9c6b-61d2ee7774a9" />
+
+### 🔐 Signup Page
+
+<img width="1364" height="722" alt="signup" src="https://github.com/user-attachments/assets/551b1e39-6cd9-485b-a32e-0a4a466df30e" />
+
+### 🛍️ Shopping Cart
+
+<img width="1363" height="704" alt="cart" src="https://github.com/user-attachments/assets/d34fa3b3-1b0d-42b2-aa0a-e905b8532628" />
+
+### 💳 Payment Checkout
+
+<img width="1365" height="724" alt="payment" src="https://github.com/user-attachments/assets/0eb88277-454f-4f1f-9abd-7bf6b1a60da4" />
+
+### 📦 Order History
+
+<img width="1363" height="713" alt="orderhistory" src="https://github.com/user-attachments/assets/454f4f7d-cf7d-438a-a901-5b978b8f5029" />
+
 ---
 
 ## ✨ Features
