@@ -3,6 +3,18 @@
 A full-stack clone of a 10-minute grocery delivery app (Zepto-style), built with a real **Node.js + Express backend**, a **SQLite database**, **JWT authentication**, and a **Tailwind CSS frontend**. Built for learning, portfolio, and placement purposes.
 
 ---
+## 🌐 Live Demo
+
+https://zepto-clone.onrender.com
+
+## 💻 GitHub Repository
+
+https://github.com/ShreyaMohite1117/zepto-clone
+
+---
+
+## 📸 Screenshots
+---
 
 ## ✨ Features
 
