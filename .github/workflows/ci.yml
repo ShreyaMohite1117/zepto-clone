@@ -1,0 +1,75 @@
+name: CI
+
+# Runs on every push and pull request targeting main.
+# This is the "CI" half of CI/CD: it verifies the backend installs cleanly,
+# has no syntax errors, and actually boots up and serves real requests
+# before any code gets merged or deployed.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-smoke-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          # Tip: once you run `npm install` locally and commit backend/package-lock.json,
+          # you can speed this workflow up by adding:
+          #   cache: 'npm'
+          #   cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Syntax-check all backend source files
+        working-directory: backend
+        run: |
+          for f in server.js seed.js config/*.js middleware/*.js routes/*.js; do
+            echo "Checking $f"
+            node --check "$f"
+          done
+
+      - name: Boot the server and smoke-test the API
+        working-directory: backend
+        run: |
+          # Start the server in the background
+          PORT=5000 node server.js &
+          SERVER_PID=$!
+
+          # Give it a moment to boot and seed the database
+          sleep 3
+
+          # Hit the health check endpoint
+          echo "Checking /api/health..."
+          curl --fail --silent http://localhost:5000/api/health
+
+          # Hit the products endpoint and confirm it returns seeded data
+          echo ""
+          echo "Checking /api/products..."
+          RESPONSE=$(curl --fail --silent http://localhost:5000/api/products)
+          echo "$RESPONSE" | grep -q '"success":true' || (echo "Products endpoint did not return success" && exit 1)
+
+          # Hit the categories endpoint too
+          echo "Checking /api/categories..."
+          curl --fail --silent http://localhost:5000/api/categories | grep -q '"success":true' || (echo "Categories endpoint did not return success" && exit 1)
+
+          echo ""
+          echo "All smoke tests passed."
+
+          # Clean up
+          kill $SERVER_PID

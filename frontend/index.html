@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zepto Clone — 10 Minute Grocery Delivery</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans pb-32 text-xl">
+
+    <!-- Toast notifications -->
+    <div id="toastContainer" class="fixed top-24 right-6 z-[70] space-y-3 w-[90%] max-w-sm"></div>
+
+    <header class="sticky top-0 bg-white shadow-md z-40 px-6 py-5 md:px-12 flex flex-col md:flex-row items-center justify-between gap-6 border-b-4 border-purple-700">
+        <div class="flex items-center gap-6 w-full md:w-auto justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-5xl font-black text-purple-700 tracking-tighter">zepto</span>
+                <span class="bg-red-500 text-white text-base font-black px-3 py-1 rounded-md animate-pulse">10 MINS</span>
+            </div>
+            <div class="flex items-center gap-4 md:hidden">
+                <button onclick="toggleAuthModal()" id="authBtnMobile" class="text-xl font-bold text-purple-700"><i class="fa-regular fa-user mr-1"></i> Login</button>
+                <button onclick="toggleCart()" class="relative bg-purple-700 text-white px-5 py-3 rounded-xl text-lg font-black">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span id="cartCountMobile" class="absolute -top-3 -right-3 bg-red-500 text-white text-sm w-7 h-7 rounded-full flex items-center justify-center border-2 border-white">0</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="w-full md:max-w-2xl relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-5 top-5 text-gray-400 text-2xl"></i>
+            <input type="text" id="searchInput" oninput="onSearchInput()" placeholder='Search "milk", "fruits" or "chips"...' class="w-full pl-14 pr-6 py-4 bg-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-600 transition-all text-xl font-medium border border-gray-200">
+        </div>
+
+        <div class="hidden md:flex items-center gap-8">
+            <div id="userProfileBtn" class="hidden items-center gap-3 cursor-pointer" onclick="openProfile()">
+                <i class="fa-solid fa-circle-user text-4xl text-purple-700"></i>
+                <span id="userNameDisplay" class="font-bold text-xl">User</span>
+            </div>
+            <button onclick="toggleAuthModal()" id="authBtnDesktop" class="font-black text-xl text-gray-700 hover:text-purple-700 transition">Sign Up / Login</button>
+
+            <button onclick="toggleCart()" class="relative bg-purple-700 hover:bg-purple-800 text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 transition shadow-lg text-xl">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>My Cart</span>
+                <span id="cartCountDesktop" class="bg-purple-900 text-white text-sm px-3 py-1 rounded-lg">0</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 mt-8 space-y-12">
+
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gradient-to-r from-purple-800 to-indigo-900 text-white p-8 rounded-3xl flex justify-between items-center relative overflow-hidden shadow-md min-h-[220px]">
+                <div class="z-10">
+                    <span class="bg-yellow-400 text-purple-950 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">SUPER SAVER</span>
+                    <h3 class="text-4xl font-black mt-3">GET 50% OFF</h3>
+                    <p class="text-lg text-purple-200 mt-1 font-medium">On your first grocery order</p>
+                    <button class="bg-white text-purple-900 font-black text-sm px-6 py-3 rounded-xl mt-5 shadow-lg hover:scale-105 transition" onclick="filterCategory('All')">Shop Now</button>
+                </div>
+                <i class="fa-solid fa-basket-shopping text-[12rem] text-purple-700/30 absolute -right-4 -bottom-8 transform -rotate-12"></i>
+            </div>
+            <div class="bg-gradient-to-r from-pink-600 to-rose-700 text-white p-8 rounded-3xl flex justify-between items-center relative overflow-hidden shadow-md min-h-[220px]">
+                <div class="z-10">
+                    <span class="bg-white text-rose-700 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">FREE DELIVERY</span>
+                    <h3 class="text-4xl font-black mt-3">Craving Snacks?</h3>
+                    <p class="text-lg text-rose-100 mt-1 font-medium">Delivered to your room in 10 mins</p>
+                    <button class="bg-yellow-400 text-neutral-900 font-black text-sm px-6 py-3 rounded-xl mt-5 shadow-lg hover:scale-105 transition" onclick="filterCategory('Munchies')">Order Now</button>
+                </div>
+                <i class="fa-solid fa-bolt text-[12rem] text-rose-500/20 absolute -right-4 -bottom-8 transform rotate-12"></i>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-3xl font-black mb-6 flex items-center gap-3">Browse by Category</h2>
+            <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide" id="categoriesContainer">
+                <div class="text-gray-400 font-bold">Loading categories...</div>
+            </div>
+        </section>
+
+        <section class="flex flex-wrap items-center justify-between gap-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-black text-gray-500 uppercase tracking-wider">Filters:</span>
+                <select id="priceFilter" onchange="applyFilters()" class="bg-gray-100 border-2 border-gray-200 rounded-xl p-3 text-base font-bold focus:ring-4 focus:ring-purple-600 focus:outline-none">
+                    <option value="all">All Prices</option>
+                    <option value="under50">Under ₹50</option>
+                    <option value="above50">₹50 & Above</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-black text-gray-500 uppercase tracking-wider">Sort By:</span>
+                <select id="sortFilter" onchange="applyFilters()" class="bg-gray-100 border-2 border-gray-200 rounded-xl p-3 text-base font-bold focus:ring-4 focus:ring-purple-600 focus:outline-none">
+                    <option value="default">Popularity</option>
+                    <option value="lowHigh">Price: Low to High</option>
+                    <option value="highLow">Price: High to Low</option>
+                </select>
+            </div>
+        </section>
+
+        <section>
+            <h2 id="catalogTitle" class="text-3xl font-black mb-6">Featured Products</h2>
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="col-span-full text-center py-16 text-gray-400 font-bold text-xl">
+                    <i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading products...
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- AUTH MODAL -->
+    <div id="authModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl w-full max-w-md p-8 relative mx-4 shadow-2xl border border-gray-100">
+            <button onclick="toggleAuthModal()" class="absolute right-6 top-6 text-gray-400 hover:text-gray-600 p-2"><i class="fa-solid fa-xmark text-3xl"></i></button>
+
+            <h3 class="text-3xl font-black text-gray-900 mb-2">Welcome to Zepto</h3>
+            <p class="text-base text-gray-500 mb-6">Sign up or log in to unlock fast checkouts</p>
+
+            <div class="flex bg-gray-100 rounded-xl p-1.5 mb-6">
+                <button id="authTabLogin" onclick="switchAuthTab('login')" class="flex-1 py-2.5 rounded-lg font-black text-base transition">Login</button>
+                <button id="authTabSignup" onclick="switchAuthTab('signup')" class="flex-1 py-2.5 rounded-lg font-black text-base transition">Create Account</button>
+            </div>
+
+            <p id="authError" class="hidden text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm font-bold mb-4"></p>
+
+            <form id="authForm" onsubmit="event.preventDefault(); submitAuthForm();" class="space-y-4">
+                <div id="authNameField" class="hidden">
+                    <label class="text-sm font-black text-gray-600 block mb-2">Full Name</label>
+                    <input type="text" id="authName" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-600 text-lg font-medium">
+                </div>
+                <div>
+                    <label class="text-sm font-black text-gray-600 block mb-2">Email Address</label>
+                    <input type="email" id="authEmail" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-600 text-lg font-medium">
+                </div>
+                <div>
+                    <label class="text-sm font-black text-gray-600 block mb-2">Password</label>
+                    <input type="password" id="authPassword" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-600 text-lg font-medium">
+                </div>
+                <button type="submit" id="authSubmitBtn" class="w-full bg-purple-700 text-white font-black py-4 rounded-xl hover:bg-purple-800 transition text-lg shadow-md mt-2 flex items-center justify-center gap-2">
+                    <span id="authSubmitText">Continue</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PROFILE MODAL -->
+    <div id="profileModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-3xl w-full max-w-lg p-8 relative mx-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <button onclick="closeProfile()" class="absolute right-6 top-6 text-gray-400 hover:text-gray-600 p-2"><i class="fa-solid fa-xmark text-3xl"></i></button>
+            <h3 class="text-2xl font-black mb-6"><i class="fa-regular fa-id-card mr-2 text-purple-700"></i>Your Profile</h3>
+            <div class="bg-gray-50 p-6 rounded-2xl border-2 border-gray-100 space-y-3 text-base mb-6">
+                <p><strong>Name:</strong> <span id="profName" class="text-lg font-bold"></span></p>
+                <p class="truncate"><strong>Email:</strong> <span id="profEmail" class="text-lg font-bold"></span></p>
+                <p><strong>Address:</strong> <span id="profAddress" class="text-base font-bold"></span></p>
+            </div>
+
+            <h4 class="text-xl font-black mb-4 mt-2"><i class="fa-solid fa-clock-rotate-left mr-2 text-purple-700"></i>Order History</h4>
+            <div id="orderHistoryList" class="space-y-3 mb-6">
+                <p class="text-gray-400 font-bold text-base">Loading orders...</p>
+            </div>
+
+            <button onclick="logout()" class="w-full bg-red-100 text-red-600 font-black py-3.5 rounded-xl hover:bg-red-200 transition text-base">Logout Account</button>
+        </div>
+    </div>
+
+    <!-- CART DRAWER -->
+    <div id="cartDrawer" class="fixed inset-0 bg-black/60 z-50 hidden transition-all opacity-0">
+        <div class="absolute right-0 top-0 bottom-0 w-full max-w-lg bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="cartDrawerPanel">
+            <div class="p-6 border-b-2 border-gray-100 flex items-center justify-between bg-purple-50">
+                <h3 class="font-black text-2xl text-purple-900 flex items-center gap-3"><i class="fa-solid fa-basket-shopping"></i> My Cart</h3>
+                <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 p-2"><i class="fa-solid fa-xmark text-3xl"></i></button>
+            </div>
+            <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
+            <div class="p-6 border-t-4 border-gray-100 space-y-6 bg-gray-50">
+                <div class="space-y-3 text-base font-bold">
+                    <div class="flex justify-between text-gray-500"><span>Subtotal</span><span id="cartSubtotal" class="text-gray-900">₹0</span></div>
+                    <div class="flex justify-between text-gray-500"><span>Delivery Charge</span><span class="text-green-600 font-black">FREE</span></div>
+                    <hr class="border-dashed border-gray-300 my-2">
+                    <div class="flex justify-between font-black text-2xl text-gray-900"><span>Grand Total</span><span id="cartGrandTotal" class="text-purple-700">₹0</span></div>
+                </div>
+                <button onclick="proceedToCheckout()" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-black py-4 rounded-2xl transition text-center text-lg shadow-xl flex items-center justify-center gap-3">
+                    <span>Proceed to Checkout</span><i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHECKOUT MODAL -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-3xl w-full max-w-xl p-8 relative mx-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <button onclick="closeCheckout()" class="absolute right-6 top-6 text-gray-400 hover:text-gray-600 p-2"><i class="fa-solid fa-xmark text-3xl"></i></button>
+            <h3 class="text-3xl font-black text-gray-900 mb-6"><i class="fa-solid fa-truck-fast text-purple-700 mr-2"></i>Secure Checkout</h3>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="text-xs font-black text-gray-500 uppercase tracking-widest block mb-2">Delivery Address</label>
+                    <div class="p-4 border-2 border-purple-600 rounded-2xl bg-purple-50/50 text-base">
+                        <p class="font-black text-gray-950 mb-1"><i class="fa-solid fa-house text-purple-700 mr-1"></i> Deliver to</p>
+                        <textarea id="deliveryAddressInput" rows="2" placeholder="Enter your full delivery address" class="w-full bg-transparent font-bold text-gray-700 focus:outline-none border-b-2 border-purple-200 mt-2 py-1 text-base resize-none"></textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-black text-gray-500 uppercase tracking-widest block mb-2">Items Summary</label>
+                    <div id="checkoutSummaryList" class="bg-gray-50 border border-gray-200 rounded-2xl p-4 max-h-40 overflow-y-auto space-y-2 text-base font-medium"></div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-black text-gray-500 uppercase tracking-widest block mb-2">Select Payment Method</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="paymentMethodGroup">
+                        <label class="border-2 p-4 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition border-purple-600 bg-purple-50">
+                            <input type="radio" name="paymentMethod" value="UPI" checked class="w-5 h-5 accent-purple-700">
+                            <div class="text-base font-black"><i class="fa-solid fa-mobile-screen text-purple-700 mr-1"></i> UPI</div>
+                        </label>
+                        <label class="border-2 p-4 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition border-gray-200">
+                            <input type="radio" name="paymentMethod" value="Card" class="w-5 h-5 accent-purple-700">
+                            <div class="text-base font-black"><i class="fa-solid fa-credit-card text-blue-600 mr-1"></i> Card</div>
+                        </label>
+                        <label class="border-2 p-4 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition border-gray-200">
+                            <input type="radio" name="paymentMethod" value="COD" class="w-5 h-5 accent-purple-700">
+                            <div class="text-base font-black"><i class="fa-solid fa-hand-holding-dollar text-green-600 mr-1"></i> COD</div>
+                        </label>
+                    </div>
+                </div>
+
+                <button onclick="placeOrder()" id="placeOrderBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-black py-4 rounded-2xl transition text-center text-lg shadow-lg flex items-center justify-center gap-3 mt-4">
+                    <i class="fa-solid fa-circle-check"></i> Pay & Place Order (<span class="checkoutTotalDisplay">₹0</span>)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDER TRACKING BAR -->
+    <div id="orderTrackingBar" class="fixed bottom-0 left-0 right-0 bg-white shadow-2xl border-t-4 border-purple-700 z-50 transform translate-y-full transition-transform duration-500">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-2xl animate-bounce">
+                    <i class="fa-solid fa-truck-ramp-box"></i>
+                </div>
+                <div>
+                    <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest">Active Order Tracking</h4>
+                    <p class="text-xl font-black text-gray-900">Status: <span id="trackingStatusText" class="text-purple-700 font-black">Confirmed</span></p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-black text-gray-400">
+                <span id="step-Confirmed" class="text-purple-700 border-b-4 border-purple-600 px-2 py-1">Confirmed</span> <i class="fa-solid fa-chevron-right text-xs"></i>
+                <span id="step-Packed" class="px-2 py-1">Packed</span> <i class="fa-solid fa-chevron-right text-xs"></i>
+                <span id="step-OutForDelivery" class="px-2 py-1">Out for Delivery</span> <i class="fa-solid fa-chevron-right text-xs"></i>
+                <span id="step-Delivered" class="px-2 py-1">Delivered</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# Render Blueprint — lets Render auto-detect and deploy this repo.
+# Usage: on render.com, click "New +" -> "Blueprint", connect this repo, and Render
+# reads this file automatically. Every push to main then triggers an auto-deploy
+# (that's the "CD" half of CI/CD) — no extra GitHub Actions deploy step needed.
+#
+# NOTE on the database: SQLite stores data in backend/database/zepto.db, a file on disk.
+# Render's free instances use an EPHEMERAL filesystem — it's wiped on every deploy/restart,
+# so the app will simply reseed fresh demo data each time (fine for a portfolio demo).
+# If you want user accounts/orders to persist across deploys, add a small Render
+# "Persistent Disk" (paid, a couple dollars/month) mounted at /opt/render/project/src/backend/database
+# and uncomment the `disk:` block below.
+
+services:
+  - type: web
+    name: zepto-clone
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: NODE_VERSION
+        value: 20.11.0
+    # disk:
+    #   name: zepto-data
+    #   mountPath: /opt/render/project/src/backend/database
+    #   sizeGB: 1

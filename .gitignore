@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Database files (auto-created on first run — don't commit your local data)
+backend/database/*.db
+backend/database/*.db-journal
+backend/database/*.db-wal
+backend/database/*.db-shm
+
+# OS / editor
+.DS_Store
+.vscode/
+*.log
+npm-debug.log*

@@ -1,0 +1,13 @@
+{
+  "name": "zepto-clone-fullstack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack Zepto-style 10-minute grocery delivery clone — Node.js + Express backend, SQLite database, JWT authentication, and a Tailwind-powered frontend.",
+  "scripts": {
+    "install-backend": "cd backend && npm install",
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "seed": "cd backend && npm run seed"
+  },
+  "license": "MIT"
+}
